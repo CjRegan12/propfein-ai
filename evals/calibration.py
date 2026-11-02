@@ -15,6 +15,7 @@ Check your work:
 
 import argparse
 import json
+import math
 from datetime import date
 from pathlib import Path
 
@@ -43,7 +44,9 @@ def bucket_for(prob: float, width: float = BUCKET_WIDTH) -> float:
       - Round the final edge to 2 decimal places too (0.55 vs 0.5500000000000001).
       - Handle prob == 1.0 so it doesn't create a 1.00 bucket.
     """
-    raise NotImplementedError("TODO 1: write bucket_for")
+    index = math.floor(round(prob / width, 9))
+    index = min(index, 19)
+    return round(index * width, 2)
 
 
 # ---------------------------------------------------------------------------
