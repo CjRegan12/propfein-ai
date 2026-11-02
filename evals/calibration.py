@@ -102,7 +102,10 @@ def expected_calibration_error(table: list[dict]) -> float:
     Why weighted: a bucket with 3,000 picks matters far more than one with 7.
     Return 0.0 if the table is empty.
     """
-    raise NotImplementedError("TODO 3: write expected_calibration_error")
+    total = sum(r["n"] for r in table)
+    if total == 0:
+        return 0.0
+    return sum(r["n"] / total * abs(r["gap"]) for r in table)
 
 
 # ---------------------------------------------------------------------------
