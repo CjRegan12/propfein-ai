@@ -73,7 +73,19 @@ def calibration_table(picks: list[dict], width: float = BUCKET_WIDTH) -> list[di
         counts the wins.
       - sorted(your_dict) gives the buckets in order.
     """
-    raise NotImplementedError("TODO 2: write calibration_table")
+    groups = {}
+    for p in picks:
+        b = bucket_for(p["prob"], width)
+        groups.setdefault(b, []).append(p)
+
+    table = []
+    for b in sorted(groups):
+        pile = groups[b]
+        n = len(pile)
+        stated = sum(p["prob"] for p in pile) / n
+        hit_rate = sum(p["won"] for p in pile) / n
+        table.append({"bucket": b, "n": n, "stated": stated, "hit_rate": hit_rate, "gap": hit_rate - stated})
+    return table
 
 
 # ---------------------------------------------------------------------------
