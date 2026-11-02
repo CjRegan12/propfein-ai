@@ -1,0 +1,24 @@
+# Secrets: never commit these
+.env
+.env.*
+!.env.example
+
+# Raw data pulled from the database stays local
+data/
+
+# Eval outputs are regenerated on every run; keep the folder, not the files
+results/*
+!results/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
