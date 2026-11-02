@@ -1,32 +1,29 @@
-# propfein-ai: calibration eval (1)
+# propfein-ai: calibration eval (2)
 
 ## Done this session
-- Spec doc "Propfein AI Layer Spec" (Claude Doc, https://claude.ai/artifact/QkHwuunqhVP45goBeqKQDS): phases, evals, timing around the 1.0 release.
-- Read-only DB role `propfein_ai_ro` created by the owner and verified: reads the 9 eval tables, writes none, can't see ef_config/ef_auth/ef_bets/ef_guest_writes, ef_paper limited to the main record account.
-- Repo scaffolded and pushed to main: db connection, settled-singles loader, `evals/calibration.py` with 3 TODO functions, 17 tests (fail on stubs, pass with a reference solution), README, docs/glossary.md.
+- Owner connected locally with the read-only login (pulled 6,618 settled NFL singles).
+- Owner hand-wrote bucket_for, calibration_table, expected_calibration_error; all 15 tests pass.
+- First real eval run: NFL ECE 3.59 points. Written up in docs/findings.md.
+- Spec doc "Propfein AI Layer Spec": https://claude.ai/artifact/QkHwuunqhVP45goBeqKQDS
 
 ## Decisions and why
-- NFL first: ~5,600 settled singles and the only sport with an injury table.
-- Calibration (stated % vs hit %) plus CLV as ground truths; calibration is what users care about.
-- MCP server waits for the public Propfein API and is built on it once, shared with Group Sweat.
-- Owner writes the eval logic himself (portfolio + Python/interview practice for FDE / AI engineer roles).
-- AI work stays off the iOS app until after 1.0 (App Store submit targeted Nov 23); user features ship with Pro later.
+- NFL first: most data, only sport with an injury table.
+- results/ stays git-ignored; findings are committed as dated sections in docs/findings.md.
+- Owner writes eval logic; teaching style that works: try it in the Python scratchpad (>>>) first, then move it into the file. He's new to the terminal: be explicit about PS prompt vs >>> vs Notepad, and about indentation (Col 5 / Col 9 in Notepad's status bar).
+- One MCP server, built later on the public Propfein API.
 
 ## Next steps
-1. Owner implements `bucket_for`, `calibration_table`, `expected_calibration_error` in `evals/calibration.py` until `python -m pytest` is green; review his code (don't write it for him).
-2. Owner runs `python -m evals.calibration --sport nfl`. Check his output against an answer key computed with the Supabase MCP (same filters as `SETTLED_SINGLES_SQL`, bucket `floor(fair_prob*20)/20`); don't write the numbers here, the owner reads this repo. There's a notable finding in the largest bucket to talk through with him.
-3. If the DB connection errors on his machine, debug `propfein_ai/db.py` / pooler URL (never run here before).
-4. Then: CLV eval (`evals/clv.py`) from `ef_paper.clv_snap` (clvFinal, clv), same TODO-plus-tests style.
+1. Extend calibration: add `--by source` and `--by side` (over vs under) options to `evals/calibration.py` to test the selection-bias hypothesis in docs/findings.md (45-60% buckets overconfident by 3-5 points). Needs the loader in `propfein_ai/data.py` to also return `source` and the leg's `name` (Over/Under). Scaffold + tests by Claude, grouping logic by the owner.
+2. Run calibration for nba and nhl and add sections to docs/findings.md.
+3. Then CLV eval (`evals/clv.py`) from `ef_paper.clv_snap` (clvFinal, clv), same TODO-plus-tests style.
+4. Small cleanup for the owner to do: replace hardcoded `19` in bucket_for with a value derived from `width`.
 
 ## Open questions for the user
-- Is "Check my slip" Pro-only or one free check a day?
-- Which news/injury source and monthly budget for the agent?
-- Still owes the quiz answer: NBA picks say 52.7% but hit 57.2%, good, bad or neither?
+- Owner hasn't yet explained ECE in his own words (interview practice); ask again.
+- Still owes the NBA quiz: picks say 52.7% but hit 57.2%, good, bad or neither?
+- Is "Check my slip" Pro-only or one free check a day? News/injury source and budget?
 
 ## Files touched
-- .gitignore, .env.example, requirements.txt: secrets/data kept out, deps
-- propfein_ai/db.py, propfein_ai/data.py: read-only connection and picks loader
-- evals/calibration.py: calibration eval with 3 TODOs and finished runner
-- tests/test_calibration.py: 17 tests including float bucketing trap
-- README.md, docs/glossary.md: recruiter-facing overview and term definitions
-- CLAUDE.md, NOTES.md: handoff
+- evals/calibration.py: owner implemented the three TODO functions
+- docs/findings.md: NFL calibration baseline write-up (owner)
+- NOTES.md: handoff update
