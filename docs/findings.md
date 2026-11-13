@@ -24,7 +24,7 @@ Bias = hit rate minus stated probability (negative = overconfident). MLB and NCA
 | Under | 2,094 | 56.2% | 54.7% | -1.6 | 2.1 |
 | Team | 520 | 48.3% | 47.5% | -0.8 | 3.9 |
 
-NFL overs are 62% of NFL picks and hit 3.6 points below what the app states. With 4,207 picks that is roughly 4 to 5 standard errors from zero, so it is not noise. Unders are close to honest. This narrows the Nov 2 finding: the mid-range overconfidence is mainly an overs problem.
+NFL overs are 62% of NFL picks and hit 3.6 points below what the app states. Unders are close to honest. This narrows the Nov 2 finding: the mid-range overconfidence is mainly an overs problem. (See section 5: the significance here was overstated, and the cause is rush yards.)
 
 ### 2. NBA leans the other way
 
@@ -34,7 +34,7 @@ NFL overs are 62% of NFL picks and hit 3.6 points below what the app states. Wit
 | Over | 464 | 51.0% | 56.9% | +5.9 |
 | Team | 225 | 52.0% | 49.8% | -2.2 |
 
-NBA props hit more often than stated, overs most of all. Smaller sample (about 2.5 standard errors for overs), so treat as likely, not proven. Possible cause: the NBA overs correction added in the H2 history work now overcorrects. NHL props are within about 1 point on both sides.
+NBA props hit more often than stated, overs most of all. Counted by lines, not bets, so treat as unproven until rerun with `--per-bet`. Possible cause: the NBA overs correction added in the H2 history work now overcorrects. NHL props are within about 1 point on both sides.
 
 ### 3. Price CLV is small but positive everywhere
 
@@ -53,10 +53,28 @@ When the line moves, the close is translated to the pick's line by the model. Th
 
 Picks whose line moved against them hit 6 points less, so the direction is meaningful. But 0-5%, 5-15% and 15%+ all hit about the same, so the translated size carries no extra information and overstates edge. Line-basis CLV should not be shown or summed as if it were real price CLV.
 
-### Recommended app changes (need a plan before building)
+### 5. Correction (same day): count bets, not lines, and the fix already exists
 
-1. NFL overs: shrink stated probability toward the market for NFL overs, or add an overs correction like the NBA one, then re-check with `--by side`.
-2. NBA: review the NBA overs correction; it may now understate picks.
+Two claims above were too strong.
+
+**The pick counts overstate certainty.** The record saves several lines for one player in one game (one game had Jayden Daniels rush overs at 34.5, 35.5, 37.5 and 38.5). Those win or lose together. Counted once per player-game-side, NFL overs are **1,267 bets over 100 games**, not 4,207 independent picks, and the bias is -3.5 against a noise band of about +/-2.8: still past noise, but only just, not "4 to 5 standard errors". The evals now have `--per-bet` for this, and the scoreboard always counts bets.
+
+**The miss is rush yards, and the app already corrected it.** Per bet:
+
+| NFL market, side | Bets | Says | Hits | Bias | Noise |
+| --- | --- | --- | --- | --- | --- |
+| Rush yards over | 359 | 54.7% | 46.7% | -8.1 | 5.3 |
+| Rush yards under | 197 | 60.9% | 65.3% | +4.4 | 7.1 |
+| Reception yards over | 754 | 53.3% | 50.9% | -2.4 | 3.6 |
+| Reception yards under | 339 | 61.5% | 64.3% | +2.7 | 5.4 |
+| Pass yards over | 101 | 55.9% | 58.2% | +2.3 | 10.0 |
+
+Overs too high and unders too low on the same stat means the app's line for rushing sat too high. The app found the same thing in four seasons of history and shipped a fix on Nov 6-7 (v157: every NFL rush-yards chance moved 0.10 log-odds toward the under, about 2.5 points). Nearly all of the rush picks above were made before v157; only 17 rush picks have been recorded since. So this eval independently confirms the v157 problem, and cannot yet say whether v157's size is enough. The record's legs do not store the lean, so before/after is split by date (`--since 2026-11-07`).
+
+### Recommended next steps
+
+1. NFL rush yards: no new app change now. v157 is measured on four seasons; 359 live bets is not enough to override it. Re-check with `python -m evals.calibration --sport nfl --by market --per-bet --since 2026-11-07` once a few weeks have settled, and only then judge whether 0.10 is too small.
+2. NBA: recheck with `--per-bet` before reading anything into the +5.9 on overs; the same line-counting applies.
 3. CLV display: anywhere the app shows or totals CLV, use price-basis only, or show line-basis as direction only.
 4. Sources: `usage`, `usageshare` and `lowline` show almost no price edge; worth checking whether they earn their spot on the board.
 

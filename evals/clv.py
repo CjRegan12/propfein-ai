@@ -75,9 +75,12 @@ def main() -> None:
     parser.add_argument("--sport", default="nfl", choices=sorted(SPORTS))
     parser.add_argument("--by", choices=GROUP_FIELDS, help="split price-basis CLV by this field")
     parser.add_argument("--min-n", type=int, default=30)
+    parser.add_argument("--since", help="only picks made on or after this date, YYYY-MM-DD")
     args = parser.parse_args()
 
-    picks = fetch_settled_singles(args.sport)
+    from propfein_ai.filters import since
+
+    picks = since(fetch_settled_singles(args.sport), args.since)
     unscored = sum(p.get("clv") is None for p in picks)
 
     print(f"\nCLV: {args.sport.upper()}  ({len(picks):,} settled picks, {unscored:,} without a final close)\n")

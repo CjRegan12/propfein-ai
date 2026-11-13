@@ -28,6 +28,9 @@ SPORTS = {
 SETTLED_SINGLES_SQL = """
     select distinct on (key)
         key,
+        at,
+        coalesce(legs -> 0 ->> 'eventId', '')         as event,
+        coalesce(legs -> 0 ->> 'description', '')     as player,
         fair_prob::float                              as prob,
         status = 'won'                                as won,
         coalesce(source, 'unknown')                   as source,

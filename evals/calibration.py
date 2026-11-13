@@ -120,7 +120,7 @@ def summarize(picks: list[dict], width: float = BUCKET_WIDTH) -> dict:
     """
     n = len(picks)
     if n == 0:
-        return {"n": 0, "stated": 0.0, "hit_rate": 0.0, "bias": 0.0, "ece": 0.0}
+        return {"n": 0, "stated": 0.0, "hit_rate": 0.0, "bias": 0.0, "ece": 0.0, "noise": 0.0}
     stated = sum(p["prob"] for p in picks) / n
     hit_rate = sum(p["won"] for p in picks) / n
     return {
@@ -129,6 +129,9 @@ def summarize(picks: list[dict], width: float = BUCKET_WIDTH) -> dict:
         "hit_rate": hit_rate,
         "bias": hit_rate - stated,
         "ece": expected_calibration_error(calibration_table(picks, width)),
+        # two standard errors of a coin-flip hit rate: a bias smaller than this
+        # could easily be luck. Only honest when picks are independent (--per-bet).
+        "noise": 1 / n ** 0.5,
     }
 
 
@@ -141,15 +144,19 @@ def calibration_by(picks: list[dict], field: str, width: float = BUCKET_WIDTH) -
 
 def print_split(sport: str, field: str, rows: list[dict], min_n: int) -> None:
     print(f"\nCalibration by {field}: {sport.upper()}\n")
-    print(f"{field.capitalize():<24}  {'Picks':>6}  {'Says':>6}  {'Hits':>6}  {'Bias':>6}  {'ECE':>5}")
-    print("-" * 64)
+    print(f"{field.capitalize():<24}  {'Picks':>6}  {'Says':>6}  {'Hits':>6}  {'Bias':>6}  {'Noise':>6}  {'ECE':>5}")
+    print("-" * 72)
     for r in rows:
         flag = "" if r["n"] >= min_n else "  (small sample)"
+        if r["n"] >= min_n and abs(r["bias"]) > r["noise"]:
+            flag += "  <- past noise"
         print(
             f"{r['group'][:24]:<24}  {r['n']:>6,}  {r['stated'] * 100:>5.1f}%  "
-            f"{r['hit_rate'] * 100:>5.1f}%  {r['bias'] * 100:>+5.1f}  {r['ece'] * 100:>5.1f}{flag}"
+            f"{r['hit_rate'] * 100:>5.1f}%  {r['bias'] * 100:>+5.1f}  "
+            f"{r['noise'] * 100:>5.1f}  {r['ece'] * 100:>5.1f}{flag}"
         )
-    print("\nBias: negative = overconfident (says more than it hits). ECE in points.\n")
+    print("\nBias: negative = overconfident. Noise: a bias inside +/- this could be luck")
+    print("(only trustworthy with --per-bet, which counts each player-game once).\n")
 
 
 # ---------------------------------------------------------------------------
@@ -191,9 +198,17 @@ def main() -> None:
     parser.add_argument(
         "--min-n", type=int, default=30, help="flag buckets with fewer picks than this"
     )
+    parser.add_argument("--since", help="only picks made on or after this date, YYYY-MM-DD")
+    parser.add_argument(
+        "--per-bet", action="store_true", help="count each player-game-side once, not every line"
+    )
     args = parser.parse_args()
 
-    picks = fetch_settled_singles(args.sport)
+    from propfein_ai.filters import per_bet, since
+
+    picks = since(fetch_settled_singles(args.sport), args.since)
+    if args.per_bet:
+        picks = per_bet(picks)
     if args.by:
         print_split(args.sport, args.by, calibration_by(picks, args.by), args.min_n)
         return

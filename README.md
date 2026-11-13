@@ -61,9 +61,12 @@ Run one eval, optionally split by `source`, `tier`, `market` or `side`:
 
 ```powershell
 python -m evals.calibration --sport nfl
-python -m evals.calibration --sport nfl --by side
+python -m evals.calibration --sport nfl --by side --per-bet
 python -m evals.clv --sport nfl --by source
+python run_evals.py --since 2026-11-07
 ```
+
+`--per-bet` counts each player-game-side once (the record saves several lines of one player's ladder, which win or lose together); use it whenever you judge whether a bias is real. `--since` cuts to picks made after an app change.
 
 ## Roadmap
 
