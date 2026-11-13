@@ -1,29 +1,28 @@
-# propfein-ai: calibration eval (2)
+# propfein-ai: eval harness (3)
 
 ## Done this session
-- Owner connected locally with the read-only login (pulled 6,618 settled NFL singles).
-- Owner hand-wrote bucket_for, calibration_table, expected_calibration_error; all 15 tests pass.
-- First real eval run: NFL ECE 3.59 points. Written up in docs/findings.md.
-- Spec doc "Propfein AI Layer Spec": https://claude.ai/artifact/QkHwuunqhVP45goBeqKQDS
+- Owner asked to move fast: Claude wrote the code this round (owner still learns by running and reading results).
+- Loader now returns source, tier, market, side, final CLV and CLV basis.
+- calibration: summarize() with signed bias, `--by source|tier|market|side`.
+- evals/clv.py: price-basis and model-translated line-basis CLV, never mixed.
+- run_evals.py: scoreboard for every sport, saved per run.
+- First full run written up in docs/findings.md (2026-11-13), also saved to the Propfein project as claude/eval-findings-nov-2026.md.
 
 ## Decisions and why
-- NFL first: most data, only sport with an injury table.
-- results/ stays git-ignored; findings are committed as dated sections in docs/findings.md.
-- Owner writes eval logic; teaching style that works: try it in the Python scratchpad (>>>) first, then move it into the file. He's new to the terminal: be explicit about PS prompt vs >>> vs Notepad, and about indentation (Col 5 / Col 9 in Notepad's status bar).
-- One MCP server, built later on the public Propfein API.
+- Line-basis CLV reported apart and treated as direction only: translated size does not predict hit rate (findings section 4).
+- Delivery: Claude never pushes from the cloud clone; commit locally, send a .patch, owner runs `git am --3way` and pushes.
 
 ## Next steps
-1. Extend calibration: add `--by source` and `--by side` (over vs under) options to `evals/calibration.py` to test the selection-bias hypothesis in docs/findings.md (45-60% buckets overconfident by 3-5 points). Needs the loader in `propfein_ai/data.py` to also return `source` and the leg's `name` (Over/Under). Scaffold + tests by Claude, grouping logic by the owner.
-2. Run calibration for nba and nhl and add sections to docs/findings.md.
-3. Then CLV eval (`evals/clv.py`) from `ef_paper.clv_snap` (clvFinal, clv), same TODO-plus-tests style.
-4. Small cleanup for the owner to do: replace hardcoded `19` in bucket_for with a value derived from `width`.
+1. App-side follow-ups live in the private propfein-ios repo and need a plan for the owner before building: NFL overs correction, NBA overs correction review, CLV display price-basis only, review weak sources. See docs/findings.md "Recommended app changes".
+2. After any app change, owner reruns `python run_evals.py` and `--by side`; add a dated findings section comparing to 2026-11-13.
+3. Next eval: parlay/ticket calibration (multi-leg picks are excluded today).
+4. Then the MCP server on the public Propfein API, and the faithfulness eval for Claude features.
 
 ## Open questions for the user
-- Owner hasn't yet explained ECE in his own words (interview practice); ask again.
-- Still owes the NBA quiz: picks say 52.7% but hit 57.2%, good, bad or neither?
-- Is "Check my slip" Pro-only or one free check a day? News/injury source and budget?
+- Which app fix first: NFL overs or NBA overs correction?
+- Owner hasn't explained ECE in his own words yet (interview practice).
 
 ## Files touched
-- evals/calibration.py: owner implemented the three TODO functions
-- docs/findings.md: NFL calibration baseline write-up (owner)
-- NOTES.md: handoff update
+- propfein_ai/data.py, propfein_ai/grouping.py, evals/calibration.py, evals/clv.py, run_evals.py, tests/test_splits_and_clv.py: new evals
+- docs/findings.md: 2026-11-13 results, Nov 2 section reformatted
+- README.md, CLAUDE.md, NOTES.md: docs
