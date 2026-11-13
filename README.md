@@ -14,7 +14,10 @@ The app itself lives in a separate private repo. This repo connects to its datab
 
 | Path | What it is |
 | --- | --- |
+| `run_evals.py` | One command: every eval, every sport, one scoreboard |
 | `evals/calibration.py` | Calibration eval: when the app says 65%, does it hit about 65%? |
+| `evals/clv.py` | Closing line value eval: do picks beat the closing price? |
+| `propfein_ai/grouping.py` | Splits picks by source, tier, market or side |
 | `propfein_ai/db.py` | Read-only database connection |
 | `propfein_ai/data.py` | Loads settled picks for evals |
 | `tests/` | Tests for every eval (no database needed) |
@@ -25,8 +28,9 @@ The app itself lives in a separate private repo. This repo connects to its datab
 
 | Eval | Status | Measures |
 | --- | --- | --- |
-| Calibration | In progress | Stated probability vs actual hit rate, by 5% bucket, plus expected calibration error (ECE) |
-| Closing line value | Planned | Whether picks beat the final market price |
+| Calibration | Done | Stated probability vs actual hit rate, by 5% bucket, plus expected calibration error (ECE) and signed bias; splittable by source, tier, market and side |
+| Closing line value | Done | Whether picks beat the final market price, with true price moves and model-translated line moves reported separately |
+| Scoreboard | Done | Every eval for every sport in one command, saved per run for regression comparisons |
 | Faithfulness | Planned | Every number the AI cites matches the data |
 | Check my slip | Planned | Do legs the agent flags as weak actually hit less? |
 
@@ -47,10 +51,18 @@ Run the tests (no database needed):
 python -m pytest
 ```
 
-Run an eval:
+Run everything (the regression run):
+
+```powershell
+python run_evals.py
+```
+
+Run one eval, optionally split by `source`, `tier`, `market` or `side`:
 
 ```powershell
 python -m evals.calibration --sport nfl
+python -m evals.calibration --sport nfl --by side
+python -m evals.clv --sport nfl --by source
 ```
 
 ## Roadmap

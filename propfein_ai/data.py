@@ -18,12 +18,30 @@ SPORTS = {
 # Settled single-leg picks from the app's paper record.
 #  - distinct on (key): the same pick can be saved twice; keep the latest copy
 #  - jsonb_array_length(legs) = 1: singles only (parlays get their own eval later)
-#  - fair_prob: the probability the app showed for the pick
+#  - prob: the probability the app showed for the pick
+#  - side: over / under for props and totals, team for moneylines and spreads
+#  - clv / clv_basis: only filled once the closing line is final.
+#      clv = your price / closing price - 1 (positive = you beat the close)
+#      basis "price" = same line, pure price comparison
+#      basis "line"  = the line moved, so the close was translated to your
+#                      line by the model (model-dependent, reported separately)
 SETTLED_SINGLES_SQL = """
     select distinct on (key)
         key,
-        fair_prob::float as prob,
-        status = 'won'    as won
+        fair_prob::float                              as prob,
+        status = 'won'                                as won,
+        coalesce(source, 'unknown')                   as source,
+        coalesce(tier, 'unknown')                     as tier,
+        coalesce(legs -> 0 ->> 'market', 'unknown')   as market,
+        case legs -> 0 ->> 'name'
+            when 'Over'  then 'over'
+            when 'Under' then 'under'
+            else 'team'
+        end                                           as side,
+        case when (clv_snap ->> 'clvFinal')::boolean
+             then (clv_snap ->> 'clv')::float end     as clv,
+        case when (clv_snap ->> 'clvFinal')::boolean
+             then coalesce(clv_snap ->> 'clvBasis', 'price') end as clv_basis
     from ef_paper
     where status in ('won', 'lost')
       and jsonb_array_length(legs) = 1
@@ -36,7 +54,10 @@ SETTLED_SINGLES_SQL = """
 def fetch_settled_singles(sport: str) -> list[dict]:
     """Return settled single picks for one sport.
 
-    Each item looks like: {"key": "...", "prob": 0.534, "won": True}
+    Each item looks like:
+        {"key": "...", "prob": 0.534, "won": True, "source": "usage",
+         "tier": "strong", "market": "player_rush_yds", "side": "over",
+         "clv": 0.021, "clv_basis": "price"}
     """
     if sport not in SPORTS:
         raise ValueError(f"Unknown sport {sport!r}. Use one of: {', '.join(SPORTS)}")

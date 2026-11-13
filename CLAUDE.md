@@ -5,7 +5,10 @@ Public eval harness and (later) MCP server for Propfein, a sports data analysis 
 ## Commands (owner is on Windows / PowerShell)
 
 - Tests: `python -m pytest` (no database needed)
-- Calibration eval: `python -m evals.calibration --sport nfl` (sports: nfl, nba, nhl, mlb, ncaaf)
+- All evals, all sports: `python run_evals.py`
+- Calibration eval: `python -m evals.calibration --sport nfl [--by source|tier|market|side]` (sports: nfl, nba, nhl, mlb, ncaaf)
+- CLV eval: `python -m evals.clv --sport nfl [--by ...]`. CLV = your decimal / close decimal - 1; basis "line" is model-translated, always reported apart from "price".
+- Delivery: Claude never pushes from the cloud clone. Commit locally, send a .patch, the owner runs `git am --3way` and pushes.
 - Setup: `python -m venv .venv`, `.venv\Scripts\Activate.ps1`, `pip install -r requirements.txt`, copy `.env.example` to `.env`
 
 ## Environment

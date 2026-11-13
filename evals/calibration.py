@@ -109,6 +109,50 @@ def expected_calibration_error(table: list[dict]) -> float:
 
 
 # ---------------------------------------------------------------------------
+# Splits: which kind of pick is driving the miscalibration?
+# ---------------------------------------------------------------------------
+def summarize(picks: list[dict], width: float = BUCKET_WIDTH) -> dict:
+    """One row of headline numbers for a set of picks.
+
+    bias = actual hit rate - average stated probability, across ALL picks.
+    Negative bias means the app says picks are better than they are
+    (overconfident). ECE says how far off it is; bias says which direction.
+    """
+    n = len(picks)
+    if n == 0:
+        return {"n": 0, "stated": 0.0, "hit_rate": 0.0, "bias": 0.0, "ece": 0.0}
+    stated = sum(p["prob"] for p in picks) / n
+    hit_rate = sum(p["won"] for p in picks) / n
+    return {
+        "n": n,
+        "stated": stated,
+        "hit_rate": hit_rate,
+        "bias": hit_rate - stated,
+        "ece": expected_calibration_error(calibration_table(picks, width)),
+    }
+
+
+def calibration_by(picks: list[dict], field: str, width: float = BUCKET_WIDTH) -> list[dict]:
+    """summarize() for each group of picks, biggest group first."""
+    from propfein_ai.grouping import group_by
+
+    return [{"group": g, **summarize(rows, width)} for g, rows in group_by(picks, field).items()]
+
+
+def print_split(sport: str, field: str, rows: list[dict], min_n: int) -> None:
+    print(f"\nCalibration by {field}: {sport.upper()}\n")
+    print(f"{field.capitalize():<24}  {'Picks':>6}  {'Says':>6}  {'Hits':>6}  {'Bias':>6}  {'ECE':>5}")
+    print("-" * 64)
+    for r in rows:
+        flag = "" if r["n"] >= min_n else "  (small sample)"
+        print(
+            f"{r['group'][:24]:<24}  {r['n']:>6,}  {r['stated'] * 100:>5.1f}%  "
+            f"{r['hit_rate'] * 100:>5.1f}%  {r['bias'] * 100:>+5.1f}  {r['ece'] * 100:>5.1f}{flag}"
+        )
+    print("\nBias: negative = overconfident (says more than it hits). ECE in points.\n")
+
+
+# ---------------------------------------------------------------------------
 # Runner (already done): loads data, prints the report, saves results
 # ---------------------------------------------------------------------------
 def print_report(sport: str, table: list[dict], ece: float, min_n: int) -> None:
@@ -137,15 +181,23 @@ def save_results(sport: str, table: list[dict], ece: float) -> Path:
 
 def main() -> None:
     from propfein_ai.data import SPORTS, fetch_settled_singles
+    from propfein_ai.grouping import GROUP_FIELDS
 
     parser = argparse.ArgumentParser(description="Propfein calibration eval")
     parser.add_argument("--sport", default="nfl", choices=sorted(SPORTS))
+    parser.add_argument(
+        "--by", choices=GROUP_FIELDS, help="split the result by this field instead"
+    )
     parser.add_argument(
         "--min-n", type=int, default=30, help="flag buckets with fewer picks than this"
     )
     args = parser.parse_args()
 
     picks = fetch_settled_singles(args.sport)
+    if args.by:
+        print_split(args.sport, args.by, calibration_by(picks, args.by), args.min_n)
+        return
+
     table = calibration_table(picks)
     ece = expected_calibration_error(table)
     print_report(args.sport, table, ece, args.min_n)
