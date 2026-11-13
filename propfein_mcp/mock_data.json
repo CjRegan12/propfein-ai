@@ -1,0 +1,270 @@
+{
+ "_note": "Invented sample data for mock mode and tests. No real players, games, picks or results.",
+ "/v1/sports": {
+  "sports": [
+   "nfl",
+   "nba",
+   "nhl",
+   "mlb",
+   "ncaaf"
+  ]
+ },
+ "/v1/board": {
+  "total": 2,
+  "picks": [
+   {
+    "sport": "nba",
+    "event_id": "sample-event-1",
+    "home": "Harbor City Gulls",
+    "away": "Mesa Verde Coyotes",
+    "starts_at": "2030-01-15T00:10:00Z",
+    "market": "player_points",
+    "player": "Sample Player One",
+    "pick": "Over",
+    "line": 24.5,
+    "price": -118,
+    "book": "samplebook",
+    "probability": 0.61,
+    "id": "00000000-0000-4000-8000-000000000001",
+    "source": "shelf",
+    "tier": "solid",
+    "recorded_at": "2030-01-14T20:00:00Z"
+   },
+   {
+    "sport": "nba",
+    "event_id": "sample-event-1",
+    "home": "Harbor City Gulls",
+    "away": "Mesa Verde Coyotes",
+    "starts_at": "2030-01-15T00:10:00Z",
+    "market": "player_rebounds",
+    "player": "Sample Player Two",
+    "pick": "Under",
+    "line": 8.5,
+    "price": -135,
+    "book": "samplebook",
+    "probability": 0.6,
+    "id": "00000000-0000-4000-8000-000000000002",
+    "source": "shelf",
+    "tier": "solid",
+    "recorded_at": "2030-01-14T20:00:00Z"
+   }
+  ]
+ },
+ "/v1/tickets": {
+  "tickets": [
+   {
+    "id": "00000000-0000-4000-8000-000000000003",
+    "tier": "cash",
+    "recorded_at": "2030-01-14T20:00:00Z",
+    "probability": 0.36,
+    "decimal_price": 2.9,
+    "legs": [
+     {
+      "sport": "nba",
+      "event_id": "sample-event-1",
+      "home": "Harbor City Gulls",
+      "away": "Mesa Verde Coyotes",
+      "starts_at": "2030-01-15T00:10:00Z",
+      "market": "player_points",
+      "player": "Sample Player One",
+      "pick": "Over",
+      "line": 24.5,
+      "price": -118,
+      "book": "samplebook",
+      "probability": 0.61,
+      "result": null
+     },
+     {
+      "sport": "nba",
+      "event_id": "sample-event-1",
+      "home": "Harbor City Gulls",
+      "away": "Mesa Verde Coyotes",
+      "starts_at": "2030-01-15T00:10:00Z",
+      "market": "player_rebounds",
+      "player": "Sample Player Two",
+      "pick": "Under",
+      "line": 8.5,
+      "price": -135,
+      "book": "samplebook",
+      "probability": 0.6,
+      "result": null
+     }
+    ]
+   }
+  ]
+ },
+ "/v1/picks/{id}": {
+  "id": "00000000-0000-4000-8000-000000000001",
+  "kind": "single",
+  "source": "shelf",
+  "tier": "solid",
+  "status": "won",
+  "recorded_at": "2030-01-14T20:00:00Z",
+  "probability": 0.61,
+  "decimal_price": 1.85,
+  "legs": [
+   {
+    "sport": "nba",
+    "event_id": "sample-event-1",
+    "home": "Harbor City Gulls",
+    "away": "Mesa Verde Coyotes",
+    "starts_at": "2030-01-15T00:10:00Z",
+    "market": "player_points",
+    "player": "Sample Player One",
+    "pick": "Over",
+    "line": 24.5,
+    "price": -118,
+    "book": "samplebook",
+    "probability": 0.61,
+    "books_probability": 0.595,
+    "priced_from": "family(3)",
+    "reason_tag": null,
+    "result": "won"
+   }
+  ],
+  "closing": {
+   "clv": 0.012,
+   "basis": "price"
+  }
+ },
+ "/v1/record": {
+  "per_bet": true,
+  "by": "side",
+  "groups": [
+   {
+    "group": "over",
+    "bets": 400,
+    "lines": 900,
+    "stated": 0.54,
+    "hit_rate": 0.51,
+    "bias": -0.03,
+    "noise": 0.05
+   },
+   {
+    "group": "under",
+    "bets": 225,
+    "lines": 500,
+    "stated": 0.6,
+    "hit_rate": 0.62,
+    "bias": 0.02,
+    "noise": 0.0667
+   }
+  ],
+  "note": "bias = hit_rate - stated (below zero = overconfident). A bias inside +/- noise could be luck."
+ },
+ "/v1/record/clv": {
+  "by": "all",
+  "groups": [
+   {
+    "group": "all",
+    "price": {
+     "picks": 300,
+     "mean": 0.006,
+     "beat_close": 0.25,
+     "unchanged": 0.5
+    },
+    "moved": {
+     "picks": 280,
+     "moved_in_favour": 0.65
+    }
+   }
+  ],
+  "note": "price = the close was on the pick's own number. moved = direction only."
+ },
+ "/v1/record/tickets": {
+  "groups": [
+   {
+    "tier": "all",
+    "tickets": 100,
+    "avg_legs": 3.0,
+    "stated": 0.25,
+    "hit_rate": 0.26,
+    "expected_wins": 25.0,
+    "wins": 26,
+    "z": 0.23,
+    "roi": -0.05
+   }
+  ],
+  "note": "z between -2 and 2 is consistent with the stated chances."
+ },
+ "/v1/players/history": {
+  "player": "Sample Player One",
+  "sport": "nba",
+  "stats": [
+   "assists",
+   "points",
+   "rebounds"
+  ],
+  "games": [
+   {
+    "date": "2030-01-12",
+    "team": "HCG",
+    "opponent": "MVC",
+    "home": true,
+    "stats": {
+     "points": 28,
+     "rebounds": 6,
+     "assists": 4
+    }
+   },
+   {
+    "date": "2030-01-10",
+    "team": "HCG",
+    "opponent": "RDR",
+    "home": false,
+    "stats": {
+     "points": 19,
+     "rebounds": 9,
+     "assists": 7
+    }
+   },
+   {
+    "date": "2030-01-08",
+    "team": "HCG",
+    "opponent": "LKS",
+    "home": true,
+    "stats": {
+     "points": 31,
+     "rebounds": 5,
+     "assists": 3
+    }
+   }
+  ],
+  "against_line": {
+   "stat": "points",
+   "line": 24.5,
+   "games": 3,
+   "over": 2,
+   "under": 1,
+   "push": 0,
+   "over_rate": 0.6667,
+   "average": 26.0,
+   "values": [
+    28,
+    19,
+    31
+   ]
+  }
+ },
+ "/v1/results": {
+  "date": "2030-01-14",
+  "games": [
+   {
+    "event_id": "sample-event-0",
+    "sport": "nba",
+    "starts_at": "2030-01-15T00:10:00Z",
+    "home": {
+     "name": "Harbor City Gulls",
+     "abbreviation": "HCG",
+     "score": 112
+    },
+    "away": {
+     "name": "Mesa Verde Coyotes",
+     "abbreviation": "MVC",
+     "score": 104
+    },
+    "status": "final"
+   }
+  ]
+ }
+}
