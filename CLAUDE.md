@@ -8,6 +8,7 @@ Public eval harness and (later) MCP server for Propfein, a sports data analysis 
 - All evals, all sports: `python run_evals.py`
 - Calibration eval: `python -m evals.calibration --sport nfl [--by source|tier|market|side]` (sports: nfl, nba, nhl, mlb, ncaaf)
 - CLV eval: `python -m evals.clv --sport nfl [--by ...]`. CLV = your decimal / close decimal - 1; basis "line" is model-translated, always reported apart from "price".
+- Slip-check eval: `python -m evals.slipcheck --sport nfl [--since ...]` (threshold and markets mirror the app; change both together)
 - Faithfulness eval: `python -m evals.faithfulness --cases <file.jsonl>` (lines of `{question, tool_results, answer}`)
 - MCP server: `python -m propfein_mcp` (stdio; `PROPFEIN_API_URL=mock` for sample data). Setup: `docs/mcp-setup.md`
 - Delivery: Claude never pushes from the cloud clone. Commit locally, send a .patch, the owner runs `git am --3way` and pushes.

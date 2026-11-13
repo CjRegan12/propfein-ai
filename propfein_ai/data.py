@@ -19,6 +19,7 @@ SPORTS = {
 #  - distinct on (key): the same pick can be saved twice; keep the latest copy
 #  - jsonb_array_length(legs) = 1: singles only (parlays get their own eval later)
 #  - prob: the probability the app showed for the pick
+#  - ev: how much better than fair the app rated the price when it made the pick
 #  - side: over / under for props and totals, team for moneylines and spreads
 #  - clv / clv_basis: only filled once the closing line is final.
 #      clv = your price / closing price - 1 (positive = you beat the close)
@@ -32,6 +33,7 @@ SETTLED_SINGLES_SQL = """
         coalesce(legs -> 0 ->> 'eventId', '')         as event,
         coalesce(legs -> 0 ->> 'description', '')     as player,
         fair_prob::float                              as prob,
+        ev::float                                     as ev,
         status = 'won'                                as won,
         coalesce(source, 'unknown')                   as source,
         coalesce(tier, 'unknown')                     as tier,

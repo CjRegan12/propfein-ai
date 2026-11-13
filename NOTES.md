@@ -1,4 +1,4 @@
-# propfein-ai: eval harness, MCP server (6)
+# propfein-ai: eval harness, MCP server (7)
 
 ## Done this session
 - Ticket (parlay) eval shipped earlier today; findings in docs/findings.md.
@@ -7,6 +7,7 @@
 - Built the MCP server here: `propfein_mcp/` (client, 8 tools, SDK wiring, invented mock data), docs/mcp-setup.md.
 - Built the faithfulness eval: evals/faithfulness.py (deterministic; pass = zero unsupported numbers).
 - 50 tests pass.
+- Later the same day: the MCP server ran in Claude Desktop on the live API (first faithfulness run on a real answer: 80 numbers, 76 supported, 4 derived by the model and flagged; decision: keep it strict). Added evals/slipcheck.py for the app's new Check my slip tags; 54 tests pass.
 
 ## Decisions and why
 - MCP server is Python, not TypeScript as the spec first said: one language in the repo, the owner is learning Python, and pytest already runs here.
@@ -16,8 +17,8 @@
 - Judge any bias per bet; line-basis CLV is direction only (unchanged).
 
 ## Next steps
-1. Owner: deploy the API (steps in the private repo's NOTES.md), make a key, fill `.env`, then `pip install -r requirements.txt` and follow docs/mcp-setup.md.
-2. First real run of server.py is on the owner's machine: if the SDK rejects something, fix server.py only.
+1. Done: API deployed, key made, MCP server running in Claude Desktop (Microsoft Store install: its config is under AppData\Local\Claude-Data, not the documented path).
+2. Strict faithfulness means the API should return subtotals so the model never adds rows itself (ticket record: the two big tiers vs the rest).
 3. After it works in Claude Desktop: save 20 to 30 real question/answer/tool-result sets to results/agent_log.jsonl and run the faithfulness eval. That is the first agent eval number.
 4. API phase 2 (plan first): live scores, legs match and odds, which the Group Sweat app needs.
 5. Pro features (Ask, Check my slip, Why this pick, recap) come after the app's 1.0 and need an Anthropic API key.

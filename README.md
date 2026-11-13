@@ -18,6 +18,7 @@ The app itself lives in a separate private repo. This repo connects to its datab
 | `evals/calibration.py` | Calibration eval: when the app says 65%, does it hit about 65%? |
 | `evals/clv.py` | Closing line value eval: do picks beat the closing price? |
 | `evals/tickets.py` | Ticket eval: do parlays win as often as they claim? |
+| `evals/slipcheck.py` | Slip-check eval: do legs tagged "Shaky" really hit less than stated? |
 | `evals/faithfulness.py` | Faithfulness eval: every number the AI cites must match the tool data |
 | `propfein_mcp/` | MCP server: lets Claude read Propfein's picks, tickets and record through the Propfein API |
 | `propfein_ai/grouping.py` | Splits picks by source, tier, market or side |
@@ -36,7 +37,7 @@ The app itself lives in a separate private repo. This repo connects to its datab
 | Tickets | Done | Parlays: expected wins vs actual wins per tier, with a z-score and ROI at the shown price |
 | Scoreboard | Done | Every eval for every sport in one command, saved per run for regression comparisons |
 | Faithfulness | Done | Every number the AI cites matches the tool data (deterministic check, no LLM judge); pass = zero unsupported numbers |
-| Check my slip | Planned | Do legs the agent flags as weak actually hit less? |
+| Slip check | Done | Do legs the app tags "Shaky" hit less than their stated chance, while untagged legs hit as stated? Says "too few" until the record holds enough |
 
 ## Setup (Windows, PowerShell)
 
@@ -69,6 +70,7 @@ python -m evals.calibration --sport nfl --by side --per-bet
 python -m evals.clv --sport nfl --by source
 python -m evals.tickets
 python run_evals.py --since 2026-11-07
+python -m evals.slipcheck --sport nfl
 python -m evals.faithfulness --cases results/agent_log.jsonl
 ```
 

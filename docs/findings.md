@@ -2,6 +2,27 @@
 
 Newest first. Every number comes from `python run_evals.py` or an eval command run on the date shown.
 
+## 2026-11-13 (evening): Which warning signs on a parlay leg mean anything
+
+Before building a "Check my slip" feature, seven candidate warning signs were tested on three NFL seasons (about 46,000 bets, counted per bet). The rules, the flags and the pass bar were written down before any result was looked at: a flag passes only if its legs hit at least 3 points under their stated chance on a held-out season, past noise, with the same direction on the other two.
+
+| Warning sign | Held-out gap | Noise | Verdict |
+| --- | --- | --- | --- |
+| Price looks 7%+ too good | -4.7 | 1.9 | **Pass** |
+| Plus-money price the app rates above break-even | -2.8 | 1.5 | Fail (bar was 3.0) |
+| Line moved against it since morning | -2.9 | 3.0 | Fail (one season, inside noise) |
+| Lone outlier price | +2.0 | 1.6 | Fail |
+| Alternate line only one book posts | +0.4 | 1.1 | Fail |
+| Modelled price | +1.7 | 0.7 | Fail |
+| Heavy juice (shorter than -220) | +1.9 | 1.1 | Fail (hits more than stated) |
+
+- One sign survived. Legs whose price looked 7%+ too good said 25.8% and hit 21.1% on the held-out season, and ran 5.6 points under on the other two.
+- Legs with no flag were honest: said 49.7%, hit 49.8% over 43,007 bets.
+- The plus-money flag missed the bar by 0.2 points. The bar was not moved after the fact.
+- A player's recent record, streak and matchup were not candidates: an earlier backtest showed they do not beat the line.
+
+**Live record check** (`python -m evals.slipcheck --sport nfl`): the record holds only 6 bets that would be tagged Shaky, so the eval answers "too few to say". The 2,137 untagged bets say 55.3% and hit 54.4% (bias -0.9, noise 2.2): consistent with the backtest. This eval becomes meaningful as tagged bets accumulate.
+
 ## 2026-11-13 (afternoon): Tickets win as often as they claim
 
 First ticket (parlay) eval, `python -m evals.tickets`. A long-shot ticket should lose most of the time, so the test is expected wins (the stated chances added up) against actual wins, with z = (won - expected) / spread. |z| under 2 is consistent with the claim.
