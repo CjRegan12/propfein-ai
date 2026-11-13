@@ -48,9 +48,16 @@ def main() -> None:
     rows = [score_sport(s, args.since) for s in args.sports]
     print_scoreboard(rows, args.since)
 
+    from evals.tickets import print_tickets, tickets_by
+    from propfein_ai.data import fetch_settled_tickets
+
+    tickets = since(fetch_settled_tickets(), args.since)
+    ticket_rows = tickets_by(tickets)
+    print_tickets(ticket_rows, "Tickets by tier (all sports)", 20)
+
     out = Path("results") / f"scoreboard_{date.today()}{f'_since_{args.since}' if args.since else ''}.json"
     out.parent.mkdir(exist_ok=True)
-    out.write_text(json.dumps(rows, indent=2))
+    out.write_text(json.dumps({"singles": rows, "tickets": ticket_rows}, indent=2, default=str))
     print(f"Saved: {out}")
 
 

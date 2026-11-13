@@ -54,6 +54,42 @@ SETTLED_SINGLES_SQL = """
 """
 
 
+SETTLED_TICKETS_SQL = """
+    select distinct on (key)
+        key,
+        at,
+        coalesce(tier, 'unknown')                     as tier,
+        coalesce(legs -> 0 ->> 'sport', 'unknown')    as sport_key,
+        jsonb_array_length(legs)                      as legs,
+        fair_prob::float                              as prob,
+        decimal::float                                as dec,
+        status = 'won'                                as won
+    from ef_paper
+    where source = 'ticket'
+      and jsonb_array_length(legs) > 1
+      and status in ('won', 'lost')
+      and fair_prob is not null
+    order by key, at desc
+"""
+
+
+def fetch_settled_tickets(sport: str | None = None) -> list[dict]:
+    """Return settled multi-leg tickets (pushes and voids left out).
+
+    prob is the chance the app stated for the whole ticket; dec is the
+    decimal payout it showed (for same-game cards, the book's likely price).
+    Each item: {"key", "at", "tier", "sport", "legs", "prob", "dec", "won"}
+    """
+    names = {v: k for k, v in SPORTS.items()}
+    with connect() as conn, conn.cursor() as cur:
+        cur.execute(SETTLED_TICKETS_SQL)
+        columns = [c.name for c in cur.description]
+        rows = [dict(zip(columns, row)) for row in cur.fetchall()]
+    for r in rows:
+        r["sport"] = names.get(r.pop("sport_key"), "other")
+    return [r for r in rows if sport is None or r["sport"] == sport]
+
+
 def fetch_settled_singles(sport: str) -> list[dict]:
     """Return settled single picks for one sport.
 

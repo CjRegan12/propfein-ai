@@ -1,4 +1,4 @@
-# propfein-ai: eval harness (4)
+# propfein-ai: eval harness (5)
 
 ## Done this session
 - Owner asked to move fast: Claude wrote the code this round (owner still learns by running and reading results).

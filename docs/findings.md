@@ -2,6 +2,26 @@
 
 Newest first. Every number comes from `python run_evals.py` or an eval command run on the date shown.
 
+## 2026-11-13 (afternoon): Tickets win as often as they claim
+
+First ticket (parlay) eval, `python -m evals.tickets`. A long-shot ticket should lose most of the time, so the test is expected wins (the stated chances added up) against actual wins, with z = (won - expected) / spread. |z| under 2 is consistent with the claim.
+
+| Tier | Tickets | Says | Hits | Expected wins | Won | z | ROI (shown price) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| All tickets | 384 | 24.9% | 25.0% | 95.8 | 96 | +0.03 | -8.3% |
+| Cash (Tonight's tickets) | 160 | 36.0% | 37.5% | 57.6 | 60 | +0.41 | +5.2% |
+| Game Script (v114) | 122 | 13.2% | 13.9% | 16.1 | 17 | +0.25 | +9.1% |
+| NHL script short | 17 | 38.9% | 41.2% | 6.6 | 7 | +0.19 | +0.9% |
+| NHL script mid | 16 | 25.2% | 12.5% | 4.0 | 2 | -1.17 | -51.6% |
+| Stacks (retired) | 15 | 22.4% | 6.7% | 3.4 | 1 | -1.48 | -65.4% |
+| NBA script short | 13 | 39.4% | 53.8% | 5.1 | 7 | +1.07 | +12.3% |
+| NBA script long | 13 | 9.3% | 0.0% | 1.2 | 0 | -1.15 | -100% |
+
+- Across all 384 settled tickets the app expected 95.8 wins and got 96. The joint chances (legs plus the measured correlation tables) are honest.
+- The two big tiers are both on target. Their positive ROI is inside noise: one ticket's payout swings so much that 160 tickets give an ROI band of roughly +/-23 points, so this says nothing yet about profit.
+- Every small tier is inside noise (|z| under 1.5). The new NBA and NHL Game Script tiers started Nov 11; recheck them after a few weeks.
+- Pushes and voids are left out (a ticket with a pushed leg is a no-result by the app's own rule).
+
 ## 2026-11-13: All-sport scoreboard, NFL overs, and a CLV caveat
 
 ### Scoreboard
@@ -34,7 +54,9 @@ NFL overs are 62% of NFL picks and hit 3.6 points below what the app states. Und
 | Over | 464 | 51.0% | 56.9% | +5.9 |
 | Team | 225 | 52.0% | 49.8% | -2.2 |
 
-NBA props hit more often than stated, overs most of all. Counted by lines, not bets, so treat as unproven until rerun with `--per-bet`. Possible cause: the NBA overs correction added in the H2 history work now overcorrects. NHL props are within about 1 point on both sides.
+NBA props hit more often than stated, overs most of all. Counted by lines, not bets, so treat as unproven until rerun with `--per-bet`.
+
+**Rerun per bet (same day):** under 401 bets, +2.4 (noise 5.0); over 301 bets, +2.0 (noise 5.8); team 89 bets, +2.1 (noise 10.6). Every side is inside noise: the +5.9 came from counting ladder rungs. No change to the NBA lean (v133) is supported. Possible cause: the NBA overs correction added in the H2 history work now overcorrects. NHL props are within about 1 point on both sides.
 
 ### 3. Price CLV is small but positive everywhere
 
